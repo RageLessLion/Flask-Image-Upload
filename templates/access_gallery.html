@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout & Upload</title>
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: left;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-group button, .form-group input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover, .form-group input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .image-item {
+            position: relative;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .image-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .delete-button:hover {
+            background-color: #ff1a1a;
+        }
+        .category-section {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .category-list {
+            list-style-type: none;
+            padding: 0;
+            text-align: left;
+        }
+        .category-list li {
+            background-color: #f0f2f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .category-list li span {
+            margin-left: 10px;
+            color: #007bff;
+            cursor: pointer;
+        }
+        .category-list li span:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('logout')}}" method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                <input type="submit" value="Logout">
+            </div>
+        </form>
+
+        <form method="POST" action="{{ url_for('upload_image') }}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="photo">{{ form.photo.label }}</label>
+        {{ form.photo(class_='form-control') }}
+    </div>
+    <div class="form-group">
+        <label for="category">{{ form.category.label }}</label>
+        {{ form.category(class_='form-control') }}
+    </div>
+    <div class="form-group">
+        <label for="name">{{ form.name.label }}</label>
+        {{ form.name(class_='form-control') }}
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Upload" class="btn btn-primary">
+    </div>
+</form>
+        <a href="/" class="btn btn-primary">Go to gallery</a>
+    </div>
+
+    <div class="category-section">
+        <h2>Categories</h2>
+        <form method="POST" action="{{ url_for('add_category') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                <label for="new_category">New Category</label>
+                <input type="text" name="new_category" id="new_category" class="form-control" placeholder="Enter new category" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Add Category</button>
+            </div>
+        </form>
+        <ul class="category-list">
+            {% for category in categories %}
+                <li>{{ category.name }} <span onclick="deleteCategory('{{ category.id }}')">Delete</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="gallery">
+        {% for image in images %}
+            <div class="image-item">
+                <img src="{{ url_for('static', filename='uploads/' ~ image.filename) }}" alt="Image">
+                <form action="{{ url_for('delete_image', image_id=image.id) }}" method="post" style="position: absolute; top: 10px; right: 10px;">
+                    {{ form.hidden_tag() }}
+                    <button type="submit" class="delete-button">Delete</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        // Turn all file input elements into FilePond elements
+
+        function deleteCategory(categoryId) {
+            if (confirm('Are you sure you want to delete this category?')) {
+                fetch(`{{ url_for('delete_category') }}?id=${categoryId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete category.');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
