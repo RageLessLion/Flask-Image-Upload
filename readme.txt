@@ -1,6 +1,6 @@
 # Flask Image Upload Application
 
-This Flask application allows the users categorize them, and view them sorted by categories on the main page. Additionally, it provides an admin page where administrators can add/delete images and categories. The delete functionality for categories is implemented using fetch.
+This Flask application allows the users to categorize and view images sorted by categories on the main page. Additionally, it provides an admin page where administrators can add/delete images and categories. The delete functionality for categories is implemented using fetch.
 
 - **Image Upload**: Admin user can upload images to the server.
 - **Main Page**: Displays images sorted by categories.
